@@ -1,15 +1,15 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=docker-ce
-PKG_VERSION:=18.09.6
-PKG_RELEASE:=1
+PKG_VERSION:=18.09.7
+PKG_RELEASE:=2
 PKG_LICENSE:=Apache-2.0
 PKG_LICENSE_FILES:=components/cli/LICENSE components/engine/LICENSE
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/docker/docker-ce/tar.gz/v$(PKG_VERSION)?
-PKG_HASH:=e8d2dd41e09e838e9043d4a5cf8433d8860afa20a611025621f7817b7ab16012
-PKG_SOURCE_VERSION:=481bc77156
+PKG_HASH:=f05dc15f5c11635472534c3aaf759c39c1bba842dd1ac23059431c2fd1ae1795
+PKG_SOURCE_VERSION:=2d0083d657
 
 PKG_MAINTAINER:=Gerard Ryan <G.M0N3Y.2503@gmail.com>
 
@@ -30,8 +30,9 @@ define Package/docker-ce
   CATEGORY:=Utilities
   TITLE:=Docker Community Edition
   URL:=https://www.docker.com/
-  DEPENDS:=$(GO_ARCH_DEPENDS) @TARGET_x86_64 +btrfs-progs +libdevmapper +containerd +cgroupfs-mount +ca-certificates +iptables-mod-extra +DOCKER_SECCOMP:libseccomp \
-           +kmod-ikconfig +kmod-veth +kmod-br-netfilter +kmod-nf-ipvs
+  DEPENDS:=$(GO_ARCH_DEPENDS) @TARGET_x86_64 +containerd +tini +libnetwork +cgroupfs-mount +btrfs-progs +libdevmapper +ca-certificates \
+           +iptables-mod-extra +DOCKER_SECCOMP:libseccomp +kmod-ikconfig +kmod-veth +kmod-br-netfilter +kmod-nf-ipvs
+  EXTRA_DEPENDS:=containerd (=1.2.6-1) runc (=1.0.0-rc8-1) tini (=0.18.0-1) libnetwork (=0.8.0-dev.2-1)
   USERID:=docker:docker
   MENU:=1
 endef
@@ -102,6 +103,8 @@ define Package/docker-ce/install
 
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/dockerd.init $(1)/etc/init.d/dockerd
+
+	$(LN) -r $(1)/usr/bin/tini $(1)/usr/bin/docker-init
 endef
 
 $(eval $(call BuildPackage,docker-ce))
